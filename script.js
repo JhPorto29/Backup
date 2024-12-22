@@ -5,10 +5,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('data-form').addEventListener('submit', function (event) {
         event.preventDefault();
-        const serial = document.getElementById('serial').value.toUpperCase();
-        const model = document.getElementById('model').value.toUpperCase();
+        const serial = document.getElementById('serial').value.trim().toUpperCase();
+        const model = document.getElementById('model').value.trim().toUpperCase();
         const date = new Date().toISOString().split('T')[0];
-        const currie = document.getElementById('currie').value.toUpperCase();
+        const currie = document.getElementById('currie').value.trim().toUpperCase();
+
+        if (!serial || !model || !currie) {
+            alert('Preencha todos os campos antes de adicionar.');
+            return;
+        }
 
         const duplicateRow = isDuplicateSerial(serial);
         if (duplicateRow) {
@@ -23,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('serial').style.borderColor = "";
         addNewEntry(serial, model, date, currie);
         document.getElementById('data-form').reset();
-        sortTableByColumn(4);
+        sortTableByColumn(1);
         updateTimeColumn();
     });
 
@@ -50,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     if (serial && model && date && currie) {
                         const formattedDate = typeof date === 'number' ? excelDateToISO(date) : date;
-                        addNewEntry(serial, model, formattedDate, currie);
+                        addNewEntry(serial.trim().toUpperCase(), model.trim().toUpperCase(), formattedDate, currie.trim().toUpperCase());
                     }
                 });
 
@@ -74,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('serial').addEventListener('input', function () {
-        const serial = this.value.toUpperCase();
+        const serial = this.value.trim().toUpperCase();
         const duplicateRow = isDuplicateSerial(serial);
         const serialField = document.getElementById('serial');
         const duplicateMessage = document.getElementById('duplicate-message');
@@ -173,8 +178,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function searchTable() {
-        const input = document.getElementById('search-box').value.toUpperCase();
+    document.getElementById('search-box').addEventListener('input', function () {
+        const input = this.value.trim().toUpperCase();
         const table = document.getElementById('data-table');
         const rows = table.querySelectorAll('tbody tr');
         const column = parseInt(document.getElementById('search-column').value);
@@ -186,12 +191,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 row.style.display = txtValue.toUpperCase().includes(input) ? "" : "none";
             }
         });
-    }
+    });
 
     window.goHome = function () {
         window.location.href = 'index.html';
     };
-
-    window.searchTable
-    // Outras funções...
 });
