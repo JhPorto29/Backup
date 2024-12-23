@@ -1,12 +1,16 @@
-from flask import Flask, request, jsonify
-import mysql.connector
 import os
+import mysql.connector
+from flask import Flask
 
 app = Flask(__name__)
 
-# Obtenha as variáveis de ambiente para a conexão
-db_url = os.environ.get('DATABASE_URL')  # Ou use as credenciais específicas
+# Carregar a variável de ambiente
+db_url = os.environ.get('DATABASE_URL')
 
+if not db_url:
+    raise ValueError("A variável de ambiente DATABASE_URL não está configurada!")
+
+# Conectar ao banco de dados
 conn = mysql.connector.connect(
     host=db_url.hostname,
     user=db_url.username,
@@ -15,21 +19,9 @@ conn = mysql.connector.connect(
 )
 cursor = conn.cursor()
 
-@app.route('/add_data', methods=['POST'])
-def add_data():
-    data = request.get_json()
-    nome = data.get('nome')
-    conteudo = data.get('conteudo')
+@app.route('/')
+def index():
+    return "Servidor rodando com banco de dados configurado!"
 
-    cursor.execute("INSERT INTO arquivos (nome, conteudo) VALUES (%s, %s)", (nome, conteudo))
-    conn.commit()
-    return jsonify({"message": "Dados inseridos com sucesso!"}), 201
-
-@app.route('/get_data', methods=['GET'])
-def get_data():
-    cursor.execute("SELECT * FROM arquivos")
-    result = cursor.fetchall()
-    return jsonify(result)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
