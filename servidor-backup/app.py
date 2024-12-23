@@ -1,32 +1,35 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
+import mysql.connector
+import os
 
-# Criando a instância do servidor Flask
 app = Flask(__name__)
 
-# Rota principal
-@app.route('/')
-def home():
-    return 'Servidor Backup está rodando!'
+# Obtenha as variáveis de ambiente para a conexão
+db_url = os.environ.get('DATABASE_URL')  # Ou use as credenciais específicas
 
-# Rota para criar um usuário (POST)
-@app.route('/user', methods=['POST'])
-def create_user():
-    data = request.get_json()  # Obtém os dados enviados no corpo da requisição (JSON)
-    
-    name = data.get('name')
-    email = data.get('email')
+conn = mysql.connector.connect(
+    host=db_url.hostname,
+    user=db_url.username,
+    password=db_url.password,
+    database=db_url.database
+)
+cursor = conn.cursor()
 
-    if not name or not email:
-        return jsonify({"error": "Name and email are required"}), 400
+@app.route('/add_data', methods=['POST'])
+def add_data():
+    data = request.get_json()
+    nome = data.get('nome')
+    conteudo = data.get('conteudo')
 
-    return jsonify({
-        "message": "Usuário criado com sucesso!",
-        "user": {
-            "name": name,
-            "email": email
-        }
-    }), 201
+    cursor.execute("INSERT INTO arquivos (nome, conteudo) VALUES (%s, %s)", (nome, conteudo))
+    conn.commit()
+    return jsonify({"message": "Dados inseridos com sucesso!"}), 201
 
-# Iniciando o servidor na porta 5000
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+@app.route('/get_data', methods=['GET'])
+def get_data():
+    cursor.execute("SELECT * FROM arquivos")
+    result = cursor.fetchall()
+    return jsonify(result)
+
+if __name__ == "__main__":
+    app.run(debug=True)
