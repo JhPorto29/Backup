@@ -1,31 +1,32 @@
-import os
-import mysql.connector
-from flask import Flask
+from flask import Flask, jsonify, request
 
+# Criando a instância do servidor Flask
 app = Flask(__name__)
 
-# Carregar a variável de ambiente
-db_url = os.environ.get('DATABASE_URL')
-
-if not db_url:
-    raise ValueError("A variável de ambiente DATABASE_URL não está configurada!")
-
-# Conectar ao banco de dados
-try:
-    conn = mysql.connector.connect(
-        host=db_url.hostname,
-        user=db_url.username,
-        password=db_url.password,
-        database=db_url.database
-    )
-    cursor = conn.cursor()
-except mysql.connector.Error as err:
-    print(f"Erro ao conectar ao banco de dados: {err}")
-    raise
-
+# Rota principal
 @app.route('/')
-def index():
-    return "Servidor rodando com banco de dados configurado!"
+def home():
+    return 'Servidor Backup está rodando!'
 
+# Rota para criar um usuário (POST)
+@app.route('/user', methods=['POST'])
+def create_user():
+    data = request.get_json()  # Obtém os dados enviados no corpo da requisição (JSON)
+    
+    name = data.get('name')
+    email = data.get('email')
+
+    if not name or not email:
+        return jsonify({"error": "Name and email are required"}), 400
+
+    return jsonify({
+        "message": "Usuário criado com sucesso!",
+        "user": {
+            "name": name,
+            "email": email
+        }
+    }), 201
+
+# Iniciando o servidor na porta 5000
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
