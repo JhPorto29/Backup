@@ -11,13 +11,17 @@ if not db_url:
     raise ValueError("A variável de ambiente DATABASE_URL não está configurada!")
 
 # Conectar ao banco de dados
-conn = mysql.connector.connect(
-    host=db_url.hostname,
-    user=db_url.username,
-    password=db_url.password,
-    database=db_url.database
-)
-cursor = conn.cursor()
+try:
+    conn = mysql.connector.connect(
+        host=db_url.hostname,
+        user=db_url.username,
+        password=db_url.password,
+        database=db_url.database
+    )
+    cursor = conn.cursor()
+except mysql.connector.Error as err:
+    print(f"Erro ao conectar ao banco de dados: {err}")
+    raise
 
 @app.route('/')
 def index():
