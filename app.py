@@ -1,47 +1,35 @@
-from flask import Flask, jsonify
-import psycopg2
-from psycopg2 import sql
-import os
-from dotenv import load_dotenv
+from flask import Flask, jsonify, request
 
-# Carregar variáveis de ambiente do arquivo .env
-load_dotenv()
-
+# Criando a instância do servidor Flask
 app = Flask(__name__)
 
-# Carregar a URL do banco de dados
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-# Verificar se a variável DATABASE_URL foi carregada corretamente
-if not DATABASE_URL:
-    raise ValueError("A variável de ambiente 'DATABASE_URL' não foi definida.")
-
-# Função para conectar ao banco de dados
-def connect_db():
-    try:
-        conn = psycopg2.connect(DATABASE_URL)
-        return conn
-    except Exception as e:
-        app.logger.error(f"Erro ao conectar ao banco de dados: {e}")
-        return None
-
 # Rota principal
-@app.route("/")
-def index():
-    conn = connect_db()
-    if conn:
-        try:
-            cursor = conn.cursor()
-            cursor.execute(sql.SQL("SELECT version();"))
-            db_version = cursor.fetchone()
-            return jsonify({"message": "Servidor conectado ao banco de dados!", "db_version": db_version[0]})
-        except Exception as e:
-            app.logger.error(f"Erro ao executar consulta no banco de dados: {e}")
-            return jsonify({"error": "Erro ao consultar o banco de dados"}), 500
-        finally:
-            # Garantir que a conexão seja fechada
-            conn.close()
-    else:
+@app.route('/')
+def home():
+    return 'Servidor Backup está rodando!'
+
+# Rota para criar um usuário (POST)
+@app.route('/user', methods=['POST'])
+def create_user():
+    data = request.get_json()  # Obtém os dados enviados no corpo da requisição (JSON)
+    
+    name = data.get('name')
+    email = data.get('email')
+
+    if not name or not email:
+        return jsonify({"error": "Name and email are required"}), 400
+
+    return jsonify({
+        "message": "Usuário criado com sucesso!",
+        "user": {
+            "name": name,
+            "email": email
+        }
+    }), 201
+
+# Iniciando o servidor na porta 5000
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
         return jsonify({"error": "Banco de dados não conectado"}), 500
 
 if __name__ == "__main__":
