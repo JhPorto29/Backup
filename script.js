@@ -51,11 +51,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 jsonData.forEach((row, index) => {
                     if (index === 0) return; // Ignora o cabeçalho
-                    const [serial, model, date, currie] = row;
+                    let [serial, model, date, currie] = row;
 
                     if (serial && model && date && currie) {
+                        serial = String(serial).trim().toUpperCase();
+                        model = String(model).trim().toUpperCase();
+                        currie = String(currie).trim().toUpperCase();
                         const formattedDate = typeof date === 'number' ? excelDateToISO(date) : date;
-                        addNewEntry(serial.trim().toUpperCase(), model.trim().toUpperCase(), formattedDate, currie.trim().toUpperCase());
+                        addNewEntry(serial, model, formattedDate, currie);
                     }
                 });
 
@@ -194,6 +197,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     window.goHome = function () {
+        window.location.href = 'index.html';
+    };
+});
         window.location.href = 'index.html';
     };
 });
