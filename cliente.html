@@ -88,6 +88,32 @@
             row.parentElement.removeChild(row);
             updateTimeColumn();
         }
+
+        function updateTimeColumn() {
+            const rows = document.querySelectorAll('#data-table tbody tr');
+            rows.forEach(row => {
+                const dateCell = row.cells[3];
+                const timeCell = row.cells[5];
+                const entryDate = new Date(dateCell.textContent.split('/').reverse().join('-'));
+                const daysInSystem = calculateDaysInSystem(entryDate);
+                const daysColor = getDaysColor(daysInSystem);
+
+                timeCell.textContent = `${daysInSystem} dias`;
+                timeCell.style.color = daysColor;
+            });
+        }
+
+        function calculateDaysInSystem(date) {
+            const currentDate = new Date();
+            const entryDate = new Date(date);
+            return Math.floor((currentDate - entryDate) / (1000 * 60 * 60 * 24));
+        }
+
+        function getDaysColor(days) {
+            if (days <= 30) return 'green';
+            else if (days <= 60) return 'orange';
+            else return 'red';
+        }
     </script>
 </body>
 </html>
