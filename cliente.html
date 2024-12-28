@@ -76,8 +76,18 @@
     </div>
     <script>
         function goToTransportPage() {
-            window.location.href = transport.html;
+            window.location.href = 'transport.html';
         }
-    </script>    
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        function removeRow(button) {
+            const row = button.closest('tr');
+            row.parentElement.removeChild(row);
+            updateTimeColumn();
+        }
+    </script>
 </body>
 </html>
