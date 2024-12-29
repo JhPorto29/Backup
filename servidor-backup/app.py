@@ -1,32 +1,29 @@
-from flask import Flask, jsonify, request
+import psycopg2
+from psycopg2 import sql
+from dotenv import load_dotenv
+import os
 
-# Criando a instância do servidor Flask
-app = Flask(__name__)
+# Carregar variáveis do .env
+load_dotenv()
 
-# Rota principal
-@app.route('/')
-def home():
-    return 'Servidor Backup está rodando!'
+# Obter a URL do banco de dados do arquivo .env
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Rota para criar um usuário (POST)
-@app.route('/user', methods=['POST'])
-def create_user():
-    data = request.get_json()  # Obtém os dados enviados no corpo da requisição (JSON)
-    
-    name = data.get('name')
-    email = data.get('email')
+try:
+    # Conectando ao banco de dados
+    connection = psycopg2.connect(DATABASE_URL, sslmode="require")
+    cursor = connection.cursor()
 
-    if not name or not email:
-        return jsonify({"error": "Name and email are required"}), 400
+    # Teste: exibir a versão do banco de dados
+    cursor.execute("SELECT version();")
+    db_version = cursor.fetchone()
+    print(f"Conectado ao PostgreSQL: {db_version[0]}")
 
-    return jsonify({
-        "message": "Usuário criado com sucesso!",
-        "user": {
-            "name": name,
-            "email": email
-        }
-    }), 201
+except Exception as e:
+    print(f"Erro ao conectar ao banco: {e}")
 
-# Iniciando o servidor na porta 5000
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+finally:
+    if 'connection' in locals() and connection:
+        cursor.close()
+        connection.close()
+        print("Conexão com o PostgreSQL encerrada.")
